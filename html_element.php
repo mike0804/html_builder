@@ -2,30 +2,30 @@
 /* creates an html element, like in js */
 class html_element
 {
-	private $self_closers;
+    private $self_closers;
     
     private $innerHTML = '';
-	private $type;
-	private $attributes;
+    private $type;
+    private $attributes;
     
     private $classes   = array();
     private $styles;
       
     private $children  = array();    
-	
-	/* constructor */
-	function __construct($type = null, $self_closers = array('input', 'img', 'hr', 'br', 'meta', 'link'))
-	{
+    
+    /* constructor */
+    function __construct($type = null, $self_closers = array('input', 'img', 'hr', 'br', 'meta', 'link'))
+    {
         if (!is_null($type))
         {
             $this->type = strtolower($type);
             $this->self_closers = $self_closers;
         }
-	}
-	
-	/* set -- array or key, value */
-	function attr($attribute, $value = null)
-	{   
+    }
+    
+    /* set -- array or key, value */
+    function attr($attribute, $value = null)
+    {   
         if (is_null($value))
         {
             return $this->attributes[$attribute];
@@ -34,7 +34,7 @@ class html_element
         {
             $this->attributes[$attribute] = $value;
         }
-	}
+    }
     
     /* remove attribute */
     function remove_attr($attribute)
@@ -47,14 +47,14 @@ class html_element
     {
         return $this->children[$id];
     }
-	
-	/* append */
-	function append($object)
-	{
-		if (@get_class($object) == __class__)
-		{
-			array_push($this->children, $object);
-		}
+    
+    /* append */
+    function append($object)
+    {
+        if (@get_class($object) == __class__)
+        {
+            array_push($this->children, $object);
+        }
         else
         {
             $text   = (string) $object;
@@ -62,11 +62,11 @@ class html_element
             $object->text($text);
             array_push($this->children, $object);
         }
-	}
+    }
     
     /* build */
-	function build()
-	{
+    function build()
+    {
         $build = '';
         
         if (is_null($this->type))
@@ -74,41 +74,41 @@ class html_element
             return $this->innerHTML;
         }
         
-		//start
-		$build = '<' . $this->type;
+        //start
+        $build = '<' . $this->type;
         
         //build class
         $this->build_class();
         
         //build style
         $this->build_style();
-		
-		//add attributes
-		if (count($this->attributes))
-		{
-			foreach($this->attributes as $key => $value)
-			{
+        
+        //add attributes
+        if (count($this->attributes))
+        {
+            foreach($this->attributes as $key => $value)
+            {
                 $value = (string) $value;
                 if (strlen($value))
                 {
                     $build .= ' ' . $key . '="' . htmlspecialchars($value) . '"';
                 }
-			}
-		}
-		
-		//closing
-		if(!in_array($this->type, $this->self_closers))
-		{
-			$build .= '>' . $this->build_innerHTML() . '</' . $this->type .'>';
-		}
-		else
-		{
-			$build .= ' />';
-		}
-		
-		//return it
-		return $build;
-	}
+            }
+        }
+        
+        //closing
+        if(!in_array($this->type, $this->self_closers))
+        {
+            $build .= '>' . $this->build_innerHTML() . '</' . $this->type .'>';
+        }
+        else
+        {
+            $build .= ' />';
+        }
+        
+        //return it
+        return $build;
+    }
     
     /* build child nodes */
     private function build_innerHTML()
@@ -203,10 +203,10 @@ class html_element
     }
     
     /* spit it out */
-	function output()
-	{
-		echo $this->build();
-	}
+    function output()
+    {
+        echo $this->build();
+    }
     
     function __toString()
     {
