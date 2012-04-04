@@ -2,20 +2,19 @@
 /* creates an html element, like in js */
 class html_element
 {
-	/* vars */
-	var $type;
-	var $attrs;
-	var $self_closers;
+	private $self_closers;
     
-    var $classes   = array();
-    var $styles;
+    private $innerHTML = '';
+	private $type;
+	private $attributes;
+    
+    private $classes   = array();
+    private $styles;
       
-    var $children  = array();
-    
-    var $innerHTML = '';
+    private $children  = array();    
 	
 	/* constructor */
-	function html_element($type = null, $self_closers = array('input', 'img', 'hr', 'br', 'meta', 'link'))
+	function __construct($type = null, $self_closers = array('input', 'img', 'hr', 'br', 'meta', 'link'))
 	{
         if (!is_null($type))
         {
@@ -24,29 +23,30 @@ class html_element
         }
 	}
 	
-	/* get */
-	function get($attr)
-	{
-		return $this->attributes[(string) $attr];
-	}
-	
 	/* set -- array or key, value */
-	function set($attr, $value)
-	{
-		$this->attributes[(string) $attr] = (string) $value;
+	function attr($attribute, $value = null)
+	{   
+        if (is_null($value))
+        {
+            return $this->attributes[$attribute];
+        }
+        else
+        {
+            $this->attributes[$attribute] = $value;
+        }
 	}
-	
-	/* remove an attribute */
-	function remove($attr)
-	{
-		unset($this->attributes[(string) $attr]);
-	}
-	
-	/* clear */
-	function clear()
-	{
-		$this->attributes = array();
-	}
+    
+    /* remove attribute */
+    function remove_attr($attribute)
+    {
+        unset($this->attributes[$attribute]);
+    }
+    
+    /* get child node */
+    function children($id)
+    {
+        return $this->children[$id];
+    }
 	
 	/* append */
 	function append($object)
@@ -64,13 +64,7 @@ class html_element
         }
 	}
     
-    /* set text */
-    function text($text)
-    {
-        $this->innerHTML = (string) $text;
-    }
-	
-	/* build */
+    /* build */
 	function build()
 	{
         $build = '';
@@ -92,16 +86,20 @@ class html_element
 		//add attributes
 		if (count($this->attributes))
 		{
-			foreach($this->attributes as $key=>$value)
+			foreach($this->attributes as $key => $value)
 			{
-				$build .= ' ' . $key . '="' . htmlspecialchars($value) . '"';
+                $value = (string) $value;
+                if (strlen($value))
+                {
+                    $build .= ' ' . $key . '="' . htmlspecialchars($value) . '"';
+                }
 			}
 		}
 		
 		//closing
 		if(!in_array($this->type, $this->self_closers))
 		{
-			$build .= '>' . $this->build_children() . '</' . $this->type .'>';
+			$build .= '>' . $this->build_innerHTML() . '</' . $this->type .'>';
 		}
 		else
 		{
@@ -112,12 +110,13 @@ class html_element
 		return $build;
 	}
     
-    function build_children()
+    /* build child nodes */
+    private function build_innerHTML()
     {
         $build = '';
         if (strlen($this->innerHTML))
         {
-            return $this->innerHTML;
+            return htmlspecialchars($this->innerHTML);
         }
         else 
         {
@@ -129,49 +128,28 @@ class html_element
         }
     }
     
+    /* set text */
+    function text($text)
+    {
+        $this->innerHTML = (string) $text;
+    }
+    
     /* build class */
-    function build_class()
+    private function build_class()
     {
         if (!empty($this->classes))
         {
             $this->classes = array_values($this->classes);
-            $this->set('class', implode(' ', $this->classes));
+            $this->attr('class', implode(' ', $this->classes));
         }
     }
-    
-    /* build style */
-    function build_style()
-    {
-        if (is_array($this->styles))
-        {
-            $build = '';
-            foreach ($this->styles as $style => $value)
-            {
-                if ($value == '') 
-                {
-                    continue;
-                }
-                $build .= $style . ':' . $value . ';';
-            }
-            if (strlen($build) != 0)
-            {
-                $this->set('style', $build);
-            }
-        }
-    }
-	
-	/* spit it out */
-	function output()
-	{
-		echo $this->build();
-	}
     
     /* add class */
     function add_class($class)
     {
         if (!is_array($class)) 
         {
-            array_push($this->classes, (string) $class);
+            array_push($this->classes, $class);
         }
         else
         {
@@ -184,14 +162,55 @@ class html_element
     {
         if (!is_array($class)) 
         {
-            $class = array((string) $class);
+            $class = array($class);
         }
         $this->classes = array_diff($this->classes, $class);
     }
     
-    function css($attr, $value = '')
+    /* build style */
+    private function build_style()
     {
-        $this->styles[(string) $attr] = (string) $value;
+        if (is_array($this->styles))
+        {
+            $build = '';
+            foreach ($this->styles as $style => $value)
+            {
+                $value = (string) $value;
+                if (strlen($value))
+                {
+                    $build .= $style . ':' . $value . ';';
+                }
+            }
+            if (strlen($build))
+            {
+                $this->attr('style', $build);
+            }
+        }
+    }
+    
+    /* set css style */
+    function css($attribute, $value = null)
+    {
+        if (is_null($value))
+        {
+            return $this->styles[$attribute];
+        }
+        else
+        {
+            $this->styles[$attribute] = $value;
+        }
+        
+    }
+    
+    /* spit it out */
+	function output()
+	{
+		echo $this->build();
+	}
+    
+    function __toString()
+    {
+        return $this->build();
     }
    
 }
